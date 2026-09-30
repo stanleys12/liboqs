@@ -36,10 +36,7 @@ def fetch_wycheproof_kem_test_cases(kem_name, suffix, valid_types):
     alg_id = kem_name.lower().replace("ml-kem-", "mlkem_")
     url = urljoin(WYCHE_ROOT, f"{alg_id}_{suffix}.json")
     
-    resp = helpers.cached_requests_get(url)
-    resp.raise_for_status()
-
-    data = json.loads(resp.content)
+    data = json.loads(helpers.cached_download(url))
     test_cases = []
     
     for group in data.get("testGroups", []):
@@ -59,10 +56,7 @@ def fetch_wycheproof_sig_test_cases(sig_name, suffix, valid_types):
     alg_id = sig_name.lower().replace("ml-dsa-", "mldsa_")
     url = urljoin(WYCHE_ROOT, f"{alg_id}_{suffix}.json")
     
-    resp = helpers.cached_requests_get(url)
-    resp.raise_for_status()
-
-    data = json.loads(resp.content)
+    data = json.loads(helpers.cached_download(url))
     test_cases = []
     
     for group in data.get("testGroups", []):

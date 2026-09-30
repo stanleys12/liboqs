@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import functools
+import hashlib
 import os
 import os.path
 import pytest
@@ -8,6 +9,7 @@ import re
 import subprocess
 import sys
 import json
+import time
 import unittest.mock
 import requests
 
@@ -265,6 +267,30 @@ def requests_get():
     with unittest.mock.patch("requests.get", wraps=requests.get) as mock_get:
         yield mock_get
 
-@functools.lru_cache
-def cached_requests_get(url: str):
-    return requests.get(url)
+# Shared on disk so that all pytest-xdist workers (and later runs) reuse a single download
+TEST_VECTOR_CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.cache', 'test_vectors')
+
+def download_with_retries(url, attempts=4):
+    for attempt in range(1, attempts + 1):
+        try:
+            resp = requests.get(url, timeout=60)
+            if resp.status_code < 500 or attempt == attempts:
+                resp.raise_for_status()
+                return resp.content
+        except (requests.ConnectionError, requests.Timeout, requests.exceptions.ChunkedEncodingError):
+            if attempt == attempts:
+                raise
+        time.sleep(2 ** attempt)
+
+def cached_download(url):
+    path = os.path.join(TEST_VECTOR_CACHE_DIR, hashlib.sha256(url.encode()).hexdigest())
+    if not os.path.exists(path):
+        content = download_with_retries(url)
+        os.makedirs(TEST_VECTOR_CACHE_DIR, exist_ok=True)
+        tmp_path = '{}.{}'.format(path, os.getpid())
+        with open(tmp_path, 'wb') as fh:
+            fh.write(content)
+        os.replace(tmp_path, path)
+        return content
+    with open(path, 'rb') as fh:
+        return fh.read()

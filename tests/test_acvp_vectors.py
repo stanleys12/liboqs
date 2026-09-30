@@ -7,7 +7,7 @@ import pytest
 import helpers
 import hashlib
 
-from helpers import requests_get, cached_requests_get
+from helpers import requests_get, cached_download
 
 ml_kem = ["ML-KEM-512", "ML-KEM-768", "ML-KEM-1024"]
 ml_sig = ["ML-DSA-44", "ML-DSA-65", "ML-DSA-87"]
@@ -77,9 +77,7 @@ def test_acvp_vec_kem_keygen(kem_name):
     if not (kem_name in ml_kem):
         pytest.skip("Not supported")
 
-    resp = cached_requests_get(ml_kem_kg)
-    assert resp.status_code == 200
-    ml_kem_kg_acvp = json.loads(resp.content)
+    ml_kem_kg_acvp = json.loads(cached_download(ml_kem_kg))
 
     variantFound = False
     for variant in ml_kem_kg_acvp["testGroups"]:
@@ -116,9 +114,7 @@ def test_acvp_vec_kem_encdec_aft(kem_name):
     if not (kem_name in ml_kem):
         pytest.skip("Not supported")
 
-    resp = cached_requests_get(ml_kem_encdec)
-    assert resp.status_code == 200
-    ml_kem_encdec_acvp = json.loads(resp.content)
+    ml_kem_encdec_acvp = json.loads(cached_download(ml_kem_encdec))
 
     variantFound = False
     for variant in ml_kem_encdec_acvp["testGroups"]:
@@ -161,9 +157,7 @@ def test_acvp_vec_kem_encdec_val(kem_name):
     if not (kem_name in ml_kem):
         pytest.skip("Not supported")
 
-    resp = cached_requests_get(ml_kem_encdec)
-    assert resp.status_code == 200
-    ml_kem_encdec_acvp = json.loads(resp.content)
+    ml_kem_encdec_acvp = json.loads(cached_download(ml_kem_encdec))
 
     variantFound = False
     for variant in ml_kem_encdec_acvp["testGroups"]:
@@ -201,9 +195,7 @@ def test_acvp_vec_kem_key_check(kem_name):
     if not (kem_name in ml_kem):
         pytest.skip("Not supported")
 
-    resp = cached_requests_get(ml_kem_encdec) 
-    assert resp.status_code == 200
-    acvp_data = json.loads(resp.content)
+    acvp_data = json.loads(cached_download(ml_kem_encdec))
 
     variantFound = False
     for variant in acvp_data["testGroups"]:
@@ -242,9 +234,7 @@ def test_acvp_vec_ml_dsa_sig_keygen(sig_name):
     if not (sig_name in ml_sig):
         pytest.skip("Not supported")
 
-    resp = cached_requests_get(ml_dsa_kg)
-    assert resp.status_code == 200
-    ml_sig_kg_acvp = json.loads(resp.content)
+    ml_sig_kg_acvp = json.loads(cached_download(ml_dsa_kg))
 
     variantFound = False
     for variant in ml_sig_kg_acvp["testGroups"]:
@@ -280,9 +270,7 @@ def test_acvp_vec_ml_dsa_sig_gen(sig_name):
     if not (sig_name in ml_sig):
         pytest.skip("Not supported")
 
-    resp = cached_requests_get(ml_dsa_sig)
-    assert resp.status_code == 200
-    ml_sig_sig_acvp = json.loads(resp.content)
+    ml_sig_sig_acvp = json.loads(cached_download(ml_dsa_sig))
 
     variantFound = False
     for variant in ml_sig_sig_acvp["testGroups"]:
@@ -377,9 +365,7 @@ def test_acvp_vec_ml_dsa_sig_ver(sig_name):
     if not (sig_name in ml_sig):
         pytest.skip("Not supported")
 
-    resp = cached_requests_get(ml_dsa_ver)
-    assert resp.status_code == 200
-    ml_sig_sig_acvp = json.loads(resp.content)
+    ml_sig_sig_acvp = json.loads(cached_download(ml_dsa_ver))
 
     variantFound = False
     for variant in ml_sig_sig_acvp["testGroups"]:
@@ -512,9 +498,7 @@ def test_acvp_vec_slh_dsa_sig_keygen(sig_name):
 
     acvp_sig_name = slh_format_name(sig_name)
 
-    resp = cached_requests_get(slh_dsa_kg)
-    assert resp.status_code == 200
-    slh_sig_kg_acvp = json.loads(resp.content)
+    slh_sig_kg_acvp = json.loads(cached_download(slh_dsa_kg))
 
     variantFound = False
     for variant in slh_sig_kg_acvp["testGroups"]:
@@ -554,9 +538,7 @@ def test_acvp_vec_slh_dsa_sig_gen(sig_name):
     if not (sig_name in slh_sig):
         pytest.skip("Not supported")
 
-    resp = cached_requests_get(slh_dsa_sig)
-    assert resp.status_code == 200
-    slh_sig_sig_acvp = json.loads(resp.content)
+    slh_sig_sig_acvp = json.loads(cached_download(slh_dsa_sig))
 
     for variant in slh_sig_sig_acvp["testGroups"]:
         for testCase in variant["tests"]:
@@ -609,9 +591,7 @@ def test_acvp_vec_slh_dsa_sig_ver(sig_name):
     if not (sig_name in slh_sig):
         pytest.skip("Not supported")
 
-    resp = cached_requests_get(slh_dsa_ver)
-    assert resp.status_code == 200
-    slh_sig_sig_acvp = json.loads(resp.content)
+    slh_sig_sig_acvp = json.loads(cached_download(slh_dsa_ver))
 
     for variant in slh_sig_sig_acvp["testGroups"]:
         for testCase in variant["tests"]:
